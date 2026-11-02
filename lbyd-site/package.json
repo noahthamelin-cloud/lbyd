@@ -1,6 +1,0 @@
-{
-  "name": "ica-engine",
-  "private": true,
-  "description": "Interactive Client Acquisition engine (XPLR Systems)",
-  "dependencies": { "@netlify/blobs": "^8.0.0" }
-}
