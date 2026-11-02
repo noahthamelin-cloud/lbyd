@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Live Before You Die</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F7F2E8; --surface:#FFFDF8; --ink:#1D1B18; --muted:#6E665A; --rule:#D9CCB2;
+  --gold:#B08A45; --gold-lt:#D8B66E; --night:#000000; --night-ink:#F2EBDD; --night-muted:#CFC5B2; --night-rule:#3A342B; --sand:#ECE4D3; --rust:#9C5B3B; --err:#A33B2E;
+  --serif:"Cormorant Garamond", Georgia, "Times New Roman", serif;
+  --sans:"Jost", "Helvetica Neue", Arial, sans-serif;
+  color-scheme: light;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --bg:#0E0D0B; --surface:#1A1814; --ink:#F2EBDD; --muted:#A79C88; --rule:#3A342B; --gold:#D8B66E; --sand:#24211C; --err:#E07A6A; color-scheme: dark; }
+}
+:root[data-theme="dark"]{ --bg:#0E0D0B; --surface:#1A1814; --ink:#F2EBDD; --muted:#A79C88; --rule:#3A342B; --gold:#D8B66E; --sand:#24211C; --err:#E07A6A; color-scheme: dark; }
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%; scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0; min-height:100%; background:var(--bg); color:var(--ink); font-family:var(--sans); font-weight:400; font-size:17px; line-height:1.55; -webkit-font-smoothing:antialiased}
+button,input,select{font:inherit; color:inherit}
+:focus-visible{outline:2px solid var(--gold); outline-offset:3px}
+.wrap{max-width:560px; margin:0 auto; padding:0 22px}
+
+/* dark screens: intro, results hero, offers */
+.dark{background:var(--night); color:var(--night-ink)}
+.intro{min-height:100vh; min-height:100dvh; display:flex; flex-direction:column}
+.intro .wrap{flex:1; display:flex; flex-direction:column; justify-content:center; padding-top:28px; padding-bottom:36px}
+.logo{width:min(250px,62vw); display:block; margin:0 auto 26px}
+.wordmark{font-family:var(--serif); font-size:22px; letter-spacing:.06em; text-align:center; color:var(--gold-lt); margin:0 0 26px}
+.intro h1{font-family:var(--serif); font-weight:500; font-size:clamp(38px,10.5vw,54px); line-height:1.02; margin:0 0 12px; text-align:center; letter-spacing:-.01em}
+.intro .sub{font-family:var(--serif); font-style:italic; font-size:20px; line-height:1.35; color:var(--gold-lt); text-align:center; margin:0 auto 22px; max-width:24em}
+.intro .lede{font-weight:300; font-size:16px; color:var(--night-muted); text-align:center; margin:0 auto 26px; max-width:30em}
+.intro .meta{display:flex; justify-content:center; gap:18px; font-size:13px; color:#A79C88; margin-bottom:28px; flex-wrap:wrap}
+.intro .note{font-size:13px; font-weight:300; color:#8C826F; text-align:center; margin:22px auto 0; max-width:30em}
+.intro .switch{text-align:center; margin-top:18px; font-size:14px}
+.intro .switch a{color:var(--gold-lt)}
+
+.btn{display:inline-flex; align-items:center; justify-content:center; min-height:54px; padding:0 30px; border-radius:30px; border:0; background:var(--gold-lt); color:#000; font-weight:500; font-size:16px; letter-spacing:.02em; cursor:pointer; text-decoration:none; width:100%}
+.btn:active{transform:translateY(1px)}
+.btn[disabled]{opacity:.4; cursor:not-allowed}
+.btn.ghost{background:transparent; color:var(--ink); border:1px solid var(--rule)}
+.dark .btn.ghost{color:var(--night-ink); border-color:var(--night-rule)}
+.intro .btn{max-width:340px; margin:0 auto}
+
+/* question screens */
+.top{position:sticky; top:0; z-index:5; background:var(--bg); padding:14px 0 10px}
+body::before{content:""; position:fixed; inset:0 0 auto; height:env(safe-area-inset-top,0px); z-index:10; background:var(--bg)}
+.topbar{display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:13px; color:var(--muted)}
+.back{background:none; border:0; padding:8px 0; cursor:pointer; color:var(--muted)}
+.track{height:3px; background:var(--rule); border-radius:2px; overflow:hidden; margin-top:10px}
+.fill{height:100%; background:var(--gold); width:0; transition:width .35s ease}
+.q{padding-top:26px; padding-bottom:40px}
+.q .part{font-size:13px; color:var(--gold); margin:0 0 10px; font-weight:500}
+.q h2{font-family:var(--serif); font-weight:500; font-size:clamp(28px,7.4vw,36px); line-height:1.12; margin:0 0 10px}
+.q .hint{color:var(--muted); font-size:15px; margin:0 0 24px}
+.opts{display:grid; gap:10px}
+.opt{display:block; width:100%; text-align:left; background:var(--surface); border:1px solid var(--rule); border-radius:14px; padding:16px 18px; font-size:16px; line-height:1.45; cursor:pointer; transition:border-color .15s, background .15s}
+.opt:hover{border-color:var(--gold)}
+.opt[aria-pressed="true"]{border-color:var(--gold); background:var(--sand); box-shadow:inset 3px 0 0 var(--gold)}
+.scale{display:grid; grid-template-columns:repeat(5,1fr); gap:8px}
+.scale .opt{text-align:center; padding:16px 0; font-family:var(--serif); font-size:22px; font-weight:600}
+.scale.ten .opt{padding:13px 0; font-size:20px}
+.ends{display:flex; justify-content:space-between; font-size:13px; color:var(--muted); margin-top:10px}
+.grid{display:grid; gap:20px}
+.grid-row .label{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px}
+.grid-row b{font-family:var(--serif); font-size:21px; font-weight:600}
+.grid-row span{font-size:13px; color:var(--muted)}
+.grid-row .scale .opt{padding:12px 0; font-size:19px}
+.next{margin-top:28px}
+
+/* gate */
+.gate{padding-top:30px; padding-bottom:44px}
+.gate .ready{font-size:13px; color:var(--gold); font-weight:500; margin:0 0 10px}
+.gate h2{font-family:var(--serif); font-weight:500; font-size:clamp(32px,9vw,44px); line-height:1.08; margin:0 0 10px}
+.gate .body{color:var(--muted); margin:0 0 26px}
+.field{margin-bottom:16px}
+.field label{display:block; font-size:14px; color:var(--muted); margin-bottom:6px}
+.field label small{color:var(--gold)}
+.field .in{display:flex; align-items:center; background:var(--surface); border:1px solid var(--rule); border-radius:14px; padding:0 16px; min-height:54px}
+.field .in:focus-within{border-color:var(--gold)}
+.field .in span{color:var(--muted); margin-right:4px}
+.field input,.field select{flex:1; border:0; background:transparent; min-height:52px; font-size:17px; outline:none; min-width:0; color:var(--ink)}
+.field .hint{font-size:13px; color:var(--muted); margin:6px 0 0}
+.field.bad .in{border-color:var(--err)}
+.field .err{font-size:13px; color:var(--err); margin:6px 0 0; display:none}
+.field.bad .err{display:block}
+.consent{font-size:13px; color:var(--muted); margin:6px 0 18px}
+.gate .note{font-size:13px; color:var(--muted); text-align:center; margin:14px 0 0}
+
+/* results */
+.res-hero{padding:44px 0 40px}
+.res-hero .k{color:var(--gold-lt); font-size:14px; margin:0 0 10px}
+.res-hero h1{font-family:var(--serif); font-weight:500; font-size:clamp(40px,11vw,58px); line-height:1; margin:0 0 14px}
+.res-hero .tag{font-family:var(--serif); font-style:italic; font-size:21px; line-height:1.35; color:var(--gold-lt); margin:0 0 18px}
+.res-hero p{font-weight:300; color:#DCD3C2; margin:0 0 12px}
+.res-hero .foot{border-top:1px solid var(--night-rule); margin-top:22px; padding-top:18px}
+.res-hero .foot b{display:block; color:var(--gold-lt); font-weight:500; font-size:14px; margin-bottom:4px}
+.res-hero .hello{font-size:14px; color:#A79C88; margin:0 0 6px}
+section.block{padding:38px 0 6px}
+section.block h3{font-family:var(--serif); font-weight:600; font-size:28px; line-height:1.15; margin:0 0 6px}
+section.block .lead{color:var(--muted); margin:0 0 22px}
+.video{position:relative; padding-top:56.25%; border-radius:14px; overflow:hidden; background:#000}
+.video iframe{position:absolute; inset:0; width:100%; height:100%; border:0}
+.meter{margin-bottom:20px}
+.meter .row{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:7px}
+.meter .row b{font-family:var(--serif); font-size:20px; font-weight:600}
+.meter .row span{font-size:14px; color:var(--muted)}
+.bar{height:10px; background:var(--sand); border-radius:6px; overflow:hidden}
+.bar i{display:block; height:100%; background:var(--gold); border-radius:6px; width:0; transition:width .9s cubic-bezier(.2,.7,.2,1)}
+.bar.low i{background:var(--rust)}
+.meter p{margin:7px 0 0; font-size:15px; color:var(--muted)}
+.actions{list-style:none; padding:0; margin:0; counter-reset:a}
+.actions li{counter-increment:a; position:relative; padding:20px 0 20px 46px; border-top:1px solid var(--rule)}
+.actions li:last-child{border-bottom:1px solid var(--rule)}
+.actions li::before{content:counter(a); position:absolute; left:0; top:17px; font-family:var(--serif); font-size:32px; line-height:1; color:var(--gold)}
+.actions .why{display:block; font-size:13px; color:var(--gold); margin-bottom:4px; font-weight:500}
+.actions .do{font-family:var(--serif); font-size:20px; line-height:1.35}
+.quote{font-family:var(--serif); font-style:italic; font-size:21px; line-height:1.4; border-left:3px solid var(--gold); padding:4px 0 4px 18px; margin:30px 0 0}
+.pdf{background:var(--sand); border-radius:14px; padding:20px; margin-top:6px}
+.pdf b{font-family:var(--serif); font-size:22px; font-weight:600; display:block}
+.pdf p{margin:4px 0 14px; color:var(--muted); font-size:15px}
+.care{background:var(--sand); border-radius:14px; padding:18px 20px; font-size:15px; color:var(--muted); margin:30px 0 0}
+.cta{margin-top:42px; padding:40px 0 48px}
+.cta h3{font-family:var(--serif); font-weight:500; font-size:32px; line-height:1.1; margin:0 0 12px}
+.cta p{font-weight:300; color:var(--night-muted); margin:0 0 24px}
+.cta .step{border-top:1px solid var(--night-rule); padding:20px 0}
+.cta .step b{font-family:var(--serif); font-size:22px; font-weight:500; display:block}
+.cta .step span{display:block; font-weight:300; font-size:15px; color:var(--night-muted); margin:4px 0 14px}
+.cta .code{display:inline-block; font-family:var(--serif); font-size:22px; letter-spacing:.08em; color:var(--gold-lt); border:1px dashed var(--night-rule); padding:6px 14px; border-radius:8px; margin-bottom:14px}
+.tools{display:grid; gap:10px; margin-top:26px}
+.toast{position:fixed; left:50%; bottom:calc(24px + env(safe-area-inset-bottom,0px)); transform:translateX(-50%); background:var(--ink); color:var(--bg); padding:10px 18px; border-radius:20px; font-size:14px; opacity:0; transition:opacity .2s; pointer-events:none; z-index:20}
+.toast.on{opacity:1}
+@media (prefers-reduced-motion: reduce){ .fill,.bar i{transition:none} }
+</style>
+</head>
+<body>
+<main id="app"></main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="config.js"></script>
+<script>
+/* =====================================================================
+   ENGINE. Reads window.ICA. Do not put coach content in here.
+   ===================================================================== */
+const C = window.ICA;
+const app = document.getElementById("app");
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const LEAD_KEY = `ica-lead-${C.coach.slug}`;
+
+/* ---------- routing: #assessment-id ---------- */
+/* Which assessment: /scorecard or /heart-over-head (clean links), or #scorecard as a fallback. Anything else = default. */
+function currentId(){
+  const path = location.pathname.replace(/^\/+|\/+$/g, "").split("/")[0];
+  const h = location.hash.replace("#","").trim();
+  if (C.assessments[path]) return path;
+  if (C.assessments[h]) return h;
+  return C.defaultAssessment;
+}
+let A, KEY, state;
+function load(){
+  A = C.assessments[currentId()];
+  KEY = `ica-${C.coach.slug}-${A.id}-v1`;
+  state = { step:-1, answers:{}, submitted:false, branch:null };
+  try { const s = JSON.parse(localStorage.getItem(KEY) || "null"); if (s && s.answers) state = s; } catch(e){}
+  document.title = `${A.title} | ${C.coach.name}`;
+}
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){} };
+const lead = () => { try { return JSON.parse(localStorage.getItem(LEAD_KEY) || "null") || {}; } catch(e){ return {}; } };
+const saveLead = l => { try { localStorage.setItem(LEAD_KEY, JSON.stringify(l)); } catch(e){} };
+window.addEventListener("hashchange", () => { load(); render(); });
+
+/* Visible questions: a question with `branch` only shows when the person's branch pick matches. Each keeps its original index (q.i) for answers. */
+const Q = () => A.questions.map((q,i) => Object.assign({ i }, q)).filter(q => !q.branch || q.branch === state.branch);
+const N = () => Q().length;           // steps: -1 intro, 0..N-1 questions, N gate, N+1 results
+const countEstimate = () => { const first = A.questions.find(q => q.type === "branch"); const b = state.branch || (first && first.opts[0][1]); return A.questions.filter(q => !q.branch || q.branch === b).length; };
+
+function render(){
+  window.scrollTo(0,0);
+  if (state.step < 0) return renderIntro();
+  if (state.step < N()) return renderQuestion();
+  if (state.step === N()) return renderGate();
+  renderResults();
+}
+
+/* ---------- intro ---------- */
+function logoHtml(){
+  return C.coach.logo
+    ? `<img class="logo" src="${esc(C.coach.logo)}" alt="${esc(C.coach.name)}" onerror="this.outerHTML='<p class=wordmark>${esc(C.coach.name)}</p>'">`
+    : `<p class="wordmark">${esc(C.coach.name)}</p>`;
+}
+function renderIntro(){
+  const resume = Object.keys(state.answers).length > 0 && !state.submitted;
+  const others = C.linkBetweenAssessments ? Object.values(C.assessments).filter(x => x.id !== A.id) : [];
+  app.innerHTML = `
+  <div class="intro dark"><div class="wrap">
+    ${logoHtml()}
+    <h1>${esc(A.title)}</h1>
+    <p class="sub">${esc(A.subtitle)}</p>
+    <p class="lede">${esc(A.lede)}</p>
+    <div class="meta"><span>${countEstimate()} questions</span><span>${esc(A.minutes)}</span><span>Private to you</span></div>
+    <button class="btn" id="start">${resume ? "Pick up where you left off" : "Start"}</button>
+    ${resume ? `<button class="btn ghost" id="restart" style="max-width:340px;margin:10px auto 0">Start over</button>` : ""}
+    <p class="note">${esc(A.privacy)}</p>
+    ${others.length ? `<p class="switch">${others.map(o => `<a href="/${o.id}">Or take ${esc(o.title)}</a>`).join(" ")}</p>` : ""}
+  </div></div>`;
+  document.getElementById("start").onclick = () => { state.step = resume ? firstUnanswered() : 0; if(!resume){ state.answers={}; state.submitted=false; state.branch=null; } save(); render(); };
+  const r = document.getElementById("restart");
+  if (r) r.onclick = () => { state = { step:0, answers:{}, submitted:false, branch:null }; save(); render(); };
+}
+function firstUnanswered(){ for (let i=0;i<N();i++) if (!answered(i)) return i; return N(); }
+function answered(i){
+  const q = Q()[i], a = state.answers[q.i];
+  if (q.type === "grid") return !!a && q.keys.every(k => a[k]);
+  return a !== undefined;
+}
+
+/* ---------- questions ---------- */
+function scaleHtml(q, cur, extra){
+  const max = q.max || 5, vals = Array.from({length:max}, (_,k)=>k+1);
+  return `<div class="scale ${max>5?"ten":""}" role="group" aria-label="1 to ${max}">` +
+    vals.map(v => `<button class="opt" ${extra||""} data-v="${v}" aria-pressed="${cur===v}">${v}</button>`).join("") + `</div>`;
+}
+function renderQuestion(){
+  const i = state.step, q = Q()[i], a = state.answers[q.i], total = state.branch ? N() : countEstimate();
+  let body = "";
+  if (q.type === "scenario" || q.type === "branch"){
+    body = `<p class="hint">${esc(q.hint || A.scenarioHint || "")}</p><div class="opts">` +
+      q.opts.map((o,k) => `<button class="opt" data-v="${k}" aria-pressed="${a===k}">${esc(o[0])}</button>`).join("") + `</div>`;
+  } else if (q.type === "scale"){
+    const ends = q.ends || A.scaleEnds || ["Low","High"];
+    body = `<p class="hint">${esc(q.hint || A.scaleHint || "")}</p>${scaleHtml(q, a)}<div class="ends"><span>${esc(ends[0])}</span><span>${esc(ends[1])}</span></div>`;
+  } else {
+    const cur = a || {};
+    body = `<p class="hint">${esc(q.hint || "")}</p><div class="grid">` +
+      q.keys.map(k => { const d = A.dimensions[k]; return `<div class="grid-row"><div class="label"><b>${esc(d.label)}</b><span>${esc(d.sub||"")}</span></div>${scaleHtml(q, cur[k], `data-key="${k}"`)}</div>`; }).join("") +
+      `</div><div class="next"><button class="btn" id="finish" ${answered(i)?"":"disabled"}>${esc(q.button || "Continue")}</button></div>`;
+  }
+  app.innerHTML = `
+  <div class="top"><div class="wrap">
+    <div class="topbar"><button class="back" id="back">\u2190 Back</button><span>${i+1} of ${total}</span></div>
+    <div class="track"><div class="fill" style="width:${Math.round(i/total*100)}%"></div></div>
+  </div></div>
+  <div class="wrap q"><p class="part">${esc(q.part||"")}</p><h2>${esc(q.q)}</h2>${body}</div>`;
+  requestAnimationFrame(() => { const f = app.querySelector(".fill"); if (f) f.style.width = Math.round((i+1)/total*98) + "%"; });
+  document.getElementById("back").onclick = () => { state.step = i-1; save(); render(); };
+  app.querySelectorAll(".opt").forEach(b => b.onclick = () => {
+    const v = Number(b.dataset.v);
+    if (q.type === "grid"){
+      state.answers[q.i] = Object.assign({}, state.answers[q.i], { [b.dataset.key]: v }); save();
+      b.parentElement.querySelectorAll(".opt").forEach(x => x.setAttribute("aria-pressed", x===b));
+      const f = document.getElementById("finish"); if (f) f.disabled = !answered(i);
+      return;
+    }
+    state.answers[q.i] = v;
+    if (q.type === "branch") state.branch = q.opts[v][1];
+    save();
+    b.parentElement.querySelectorAll(".opt").forEach(x => x.setAttribute("aria-pressed", x===b));
+    setTimeout(() => { state.step = i+1; save(); render(); }, 220);
+  });
+  const fin = document.getElementById("finish");
+  if (fin) fin.onclick = () => { if (answered(i)) { state.step = i+1; save(); render(); } };
+}
+
+/* ---------- scoring ---------- */
+function score(){
+  const sums = {}, picks = {};
+  Object.keys(A.patterns).forEach(k => picks[k] = 0);
+  Object.keys(A.dimensions).forEach(k => sums[k] = []);
+  const push = (k, v, max) => { if (sums[k]) sums[k].push(Math.round((v-1)/(max-1)*100)); };
+  Q().forEach(q => {
+    const a = state.answers[q.i]; if (a === undefined) return;
+    if (q.type === "scenario") picks[q.opts[a][1]]++;
+    if (q.type === "scale"){ const max = q.max||5; push(q.key, a, max); if (q.also) push(q.also.key, q.also.reverse ? (max+1-a) : a, max); }
+    if (q.type === "grid") Object.entries(a).forEach(([k,v]) => push(k, v, q.max||5));
+  });
+  const dims = {};
+  Object.entries(sums).forEach(([k,arr]) => dims[k] = arr.length ? Math.round(arr.reduce((x,y)=>x+y,0)/arr.length) : null);
+  const lowGroup = (A.groups.find(g => g.lowestFrom) || A.groups[0]).id;
+  const order = A.lowestOrder || Object.keys(dims);
+  const ranked = Object.entries(dims).filter(([k,v]) => A.dimensions[k].group === lowGroup && v !== null)
+    .sort((a,b) => (a[1]-b[1]) || (order.indexOf(a[0]) - order.indexOf(b[0])));
+  const groupVals = ranked.map(r => r[1]);
+  const overall = A.overall && groupVals.length ? Math.round(groupVals.reduce((x,y)=>x+y,0)/groupVals.length) : null;
+  const s = { dims, picks, overall, branch: state.branch, low: ranked[0] && ranked[0][0], next: ranked[1] && ranked[1][0] };
+  if (typeof A.profile === "function") s.pattern = A.profile(s);
+  else {
+    s.pattern = A.patternOrder.reduce((best,k) => picks[k] > picks[best] ? k : best, A.patternOrder[0]);
+    if (A.forcePattern && picks[A.forcePattern.key] >= A.forcePattern.min) s.pattern = A.forcePattern.key;
+  }
+  return s;
+}
+function level(v, g, d){
+  const t = (d && d.thresholds) || g.thresholds || [65,40];
+  const L = (d && d.labels) || g.labels;
+  return v >= t[0] ? ["high", L.high] : v >= t[1] ? ["mid", L.mid] : ["low", L.low];
+}
+const pick = (v, s) => (v && typeof v === "object") ? (v[s.branch] || Object.values(v)[0]) : v;   // branch-keyed text
+function actionsFor(s){
+  const P = A.patterns[s.pattern], D = A.dimensions;
+  const rule = (A.rules||[]).find(r => r.when(s));
+  const dimAct = k => ({ why: D[k].why || `Your lowest: ${D[k].label}`, action: pick(D[k].action, s) });
+  const acts = [{ why:`Your ${A.patternWord || "pattern"}: ${P.name}`, action:pick(P.action, s) }];
+  if (rule) acts.push({ why:rule.why, action:rule.action });
+  else if (s.low && D[s.low].action){
+    const g = A.groups.find(x => x.lowestFrom) || A.groups[0], strong = s.dims[s.low] >= ((g.thresholds||[65,40])[0]);
+    acts.push(Object.assign(dimAct(s.low), { why: strong ? `Keep ${D[s.low].label} strong` : D[s.low].why ? `${D[s.low].label}: ${D[s.low].why}` : `Your biggest leverage point: ${D[s.low].label}` }));
+  }
+  const nextKey = (rule && rule.dim !== s.low) ? s.low : s.next;
+  if (nextKey && D[nextKey].action){ const a = pick(D[nextKey].action, s); if (!acts.some(x => x.action === a)) acts.push({ why:`Next: ${D[nextKey].label}`, action:a }); }
+  return acts.filter(a => a.action).slice(0,3);
+}
+function readableAnswers(){
+  return Q().map((q,i) => {
+    const a = state.answers[q.i]; let out;
+    if (q.type === "scenario" || q.type === "branch") out = a === undefined ? null : q.opts[a][0];
+    else if (q.type === "scale") out = a ?? null;
+    else { out = {}; Object.entries(a||{}).forEach(([k,v]) => out[A.dimensions[k].label] = v); }
+    return { n:i+1, part:q.part||"", question:q.q, answer:out };
+  });
+}
+
+/* ---------- gate ---------- */
+function renderGate(){
+  const G = C.gate, L = lead();
+  app.innerHTML = `
+  <div class="top"><div class="wrap"><div class="topbar"><button class="back" id="back">\u2190 Back</button><span>Almost there</span></div><div class="track"><div class="fill" style="width:98%"></div></div></div></div>
+  <div class="wrap gate">
+    <p class="ready">All ${N()} answered</p>
+    <h2>${esc(G.heading)}</h2>
+    <p class="body">${esc(G.body)}</p>
+    <form id="gate" novalidate>
+      ${G.fields.map(f => `
+      <div class="field" data-key="${f.key}">
+        <label for="f-${f.key}">${esc(f.label)} ${f.required ? "" : "<small>optional</small>"}</label>
+        <div class="in">${f.prefix ? `<span>${esc(f.prefix)}</span>` : ""}${f.type === "select"
+          ? `<select id="f-${f.key}" name="${f.key}"><option value="">Choose one</option>${(f.options||[]).map(o => `<option ${L[f.key]===o?"selected":""}>${esc(o)}</option>`).join("")}</select>`
+          : `<input id="f-${f.key}" name="${f.key}" type="${f.type||"text"}" inputmode="${f.type==="tel"?"tel":f.type==="email"?"email":"text"}" autocomplete="${f.autocomplete||"on"}" value="${esc(L[f.key]||"")}" ${f.required?"required":""}>`}</div>
+        ${f.hint ? `<p class="hint">${esc(f.hint)}</p>` : ""}
+        <p class="err">${f.type==="email" ? "That email doesn\u2019t look right." : f.type==="tel" ? "Add your number with the country code." : "This one is needed."}</p>
+      </div>`).join("")}
+      <p class="consent">${esc(G.consent)}</p>
+      <button class="btn" type="submit" id="go">${esc(G.button)}</button>
+    </form>
+    <p class="note">${esc(G.note)}</p>
+  </div>`;
+  document.getElementById("back").onclick = () => { state.step = N()-1; save(); render(); };
+  document.getElementById("gate").onsubmit = async e => {
+    e.preventDefault();
+    const data = {}; let ok = true;
+    G.fields.forEach(f => {
+      const el = document.getElementById("f-"+f.key), wrap = el.closest(".field");
+      let v = el.value.trim(); if (f.key === "instagram") v = v.replace(/^@/,"");
+      let bad = f.required && !v;
+      if (v && f.type === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) bad = true;
+      if (v && f.type === "tel" && v.replace(/\D/g,"").length < 7) bad = true;
+      wrap.classList.toggle("bad", bad); if (bad) ok = false; data[f.key] = v;
+    });
+    if (!ok) return;
+    saveLead(data);
+    const btn = document.getElementById("go"); btn.disabled = true; btn.textContent = "One moment";
+    await submit(data);
+    state.step = N()+1; save(); render();
+  };
+}
+
+async function submit(data){
+  const s = score();
+  const payload = {
+    coach: C.coach.slug, assessment: A.id, assessment_title: A.title,
+    lead: data,
+    pattern: s.pattern, pattern_label: A.patterns[s.pattern].name,
+    scores: s.dims, picks: s.picks, lowest: s.low, overall: s.overall, branch: s.branch,
+    answers: readableAnswers(),
+    actions: actionsFor(s).map(a => a.action),
+    meta: { ref: document.referrer || "", ua: navigator.userAgent, page: location.href }
+  };
+  try {
+    const r = await fetch("/.netlify/functions/submit", { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify(payload) });
+    if (!r.ok) throw new Error("submit " + r.status);
+    state.submitted = true; state.pending = null;
+  } catch(e) {
+    // never block the person from their results; keep the payload and retry on the results screen
+    state.pending = payload;
+  }
+  save();
+}
+async function retryPending(){
+  if (!state.pending || state.submitted) return;
+  try {
+    const r = await fetch("/.netlify/functions/submit", { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify(state.pending) });
+    if (r.ok){ state.submitted = true; state.pending = null; save(); }
+  } catch(e){}
+}
+
+/* ---------- results ---------- */
+/* Drive share link -> direct download. Any other URL or path passes through. Placeholders are hidden. */
+function fileUrl(u){
+  if (!u || /^PASTE_/.test(u)) return "";
+  const m = u.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?.*id=)([\w-]{20,})/);
+  return m ? `https://drive.google.com/uc?export=download&id=${m[1]}` : u;
+}
+function embed(url){
+  if (!url) return "";
+  let m;
+  if ((m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/|embed\/))([\w-]{6,})/))) return `https://www.youtube.com/embed/${m[1]}?rel=0`;
+  if ((m = url.match(/vimeo\.com\/(?:video\/)?(\d+)/))) return `https://player.vimeo.com/video/${m[1]}`;
+  return url;
+}
+function renderResults(){
+  retryPending();
+  const s = score(), P = A.patterns[s.pattern], R = A.results, D = A.dimensions, L = lead();
+  const acts = actionsFor(s);
+  const groupsHtml = A.groups.map(g => {
+    const keys = Object.keys(D).filter(k => D[k].group === g.id && s.dims[k] !== null);
+    const leadTxt = g.leadLowest && s.low ? g.leadLowest.replace("{low}", `<b>${esc(D[s.low].label.toLowerCase())}</b>`) : esc(g.lead||"");
+    return `<section class="block"><h3>${esc(g.title)}</h3><p class="lead">${leadTxt}</p>` +
+      keys.map(k => { const v = s.dims[k], [lvl, lab] = level(v, g, D[k]); const isLow = g.lowIsBad !== false && lvl === "low"; const note = D[k].notes ? D[k].notes[lvl] : "";
+        return `<div class="meter"><div class="row"><b>${esc(D[k].label)}</b><span>${esc(lab)}</span></div><div class="bar ${isLow?"low":""}"><i data-w="${Math.max(v,4)}"></i></div>${note?`<p>${esc(note)}</p>`:""}</div>`; }).join("") +
+      `</section>`;
+  }).join("");
+  const offers = C.offers.items.filter(o => o.enabled && o.url && (!o.when || o.when(L, s)));
+  const others = C.linkBetweenAssessments ? Object.values(C.assessments).filter(x => x.id !== A.id) : [];
+  const video = embed(P.video);
+  app.innerHTML = `
+  <div class="res-hero dark"><div class="wrap">
+    ${L.name ? `<p class="hello">${esc(L.name)}, here\u2019s what your answers show.</p>` : ""}
+    <p class="k">${esc(A.patternKicker)}${s.overall !== null ? ` · ${esc(R.overallLabel || "Overall")} ${s.overall}/100` : ""}</p>
+    <h1>${esc(P.name)}</h1>
+    <p class="tag">${esc(P.tag)}</p>
+    <p>${esc(P.body)}</p>
+    <div class="foot"><b>${esc(P.footLabel)}</b>${esc(P.foot)}</div>
+  </div></div>
+  <div class="wrap">
+    ${video ? `<section class="block"><h3>${esc(R.videoTitle)}</h3><div class="video"><iframe src="${esc(video)}" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen title="${esc(P.name)}"></iframe></div></section>` : ""}
+    <section class="block">
+      <h3>${esc(R.actionsTitle)}</h3><p class="lead">${esc(R.actionsLead)}</p>
+      <ol class="actions">${acts.map(a => `<li><span class="why">${esc(a.why)}</span><span class="do">${esc(a.action)}</span></li>`).join("")}</ol>
+      ${R.note ? `<p class="quote">${esc(R.note)}</p>` : ""}
+    </section>
+    ${groupsHtml}
+    ${fileUrl(P.pdf) ? `<section class="block"><div class="pdf"><b>${esc(R.pdfTitle)}</b><p>${esc(R.pdfBody)}</p><a class="btn" href="${esc(fileUrl(P.pdf))}" target="_blank" rel="noopener">${esc(R.pdfButton)}</a></div></section>` : ""}
+    <p class="care">${esc(R.care)}</p>
+  </div>
+  <div class="cta dark"><div class="wrap">
+    <h3>${esc(C.offers.heading)}</h3>
+    <p>${esc(C.coach.programLine)}</p>
+    ${offers.map(o => `<div class="step"><b>${esc(o.title)}</b><span>${esc(o.body)}</span>${o.code ? `<div class="code">${esc(o.code)}</div><br>` : ""}<a class="btn" href="${esc(o.url)}" target="_blank" rel="noopener">${esc(o.button)}</a></div>`).join("")}
+    <div class="tools">
+      ${others.map(o => `<a class="btn ghost" href="/${o.id}">Take ${esc(o.title)}</a>`).join("")}
+      <button class="btn ghost" id="copy">Copy my results</button>
+      <button class="btn ghost" id="again">Retake</button>
+    </div>
+  </div></div>`;
+  requestAnimationFrame(() => setTimeout(() => app.querySelectorAll(".bar i").forEach(i => i.style.width = i.dataset.w + "%"), 60));
+  document.getElementById("again").onclick = () => { state = { step:0, answers:{}, submitted:false, branch:null }; save(); render(); };
+  document.getElementById("copy").onclick = async () => {
+    const bars = Object.keys(D).filter(k => s.dims[k] !== null).map(k => `${D[k].label} ${s.dims[k]}/100`).join(", ");
+    const text = `My ${A.title} result: ${P.name}. ${bars}.\n\nTomorrow:\n` + acts.map((a,k) => `${k+1}. ${a.action}`).join("\n");
+    try { await navigator.clipboard.writeText(text); toast("Results copied"); }
+    catch(e){ const t = document.createElement("textarea"); t.value = text; document.body.appendChild(t); t.select(); try { document.execCommand("copy"); toast("Results copied"); } catch(_){ toast("Copy not available here"); } t.remove(); }
+  };
+}
+function toast(m){ const t = document.getElementById("toast"); t.textContent = m; t.classList.add("on"); setTimeout(() => t.classList.remove("on"), 1800); }
+
+load(); render();
+</script>
+</body>
+</html>
