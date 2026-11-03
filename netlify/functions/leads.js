@@ -1,10 +1,11 @@
 // Admin API. Checks the PIN, then returns every lead in this site's Blobs store.
 // Env vars: ADMIN_PIN (what the coach types to sign in), COACH_SLUG, optional COACH_NAME.
-const { getStore } = require("@netlify/blobs");
+const { getStore, connectLambda } = require("@netlify/blobs");
 const json = (status, body) => ({ statusCode: status, headers: { "Content-Type": "application/json", "Cache-Control": "no-store" }, body: JSON.stringify(body) });
 
 exports.handler = async (event) => {
   if (event.httpMethod !== "POST") return json(405, { error: "POST only" });
+  connectLambda(event);   // required for classic (Lambda-style) functions to reach Netlify Blobs
   const { ADMIN_PIN, COACH_SLUG, COACH_NAME } = process.env;
   if (!ADMIN_PIN) return json(500, { error: "Admin is not configured. Set ADMIN_PIN." });
   let p; try { p = JSON.parse(event.body || "{}"); } catch (e) { return json(400, { error: "Bad JSON" }); }
