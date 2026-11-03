@@ -1,11 +1,12 @@
 // Receives a finished assessment from the page and stores it in this site's Netlify Blobs store.
-// No external setup. Env var: COACH_SLUG (must match coach.slug in public/config.js).
-const { getStore } = require("@netlify/blobs");
+// No external setup. Env var: COACH_SLUG (must match coach.slug in config.js).
+const { getStore, connectLambda } = require("@netlify/blobs");
 const crypto = require("crypto");
 const json = (status, body) => ({ statusCode: status, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
 
 exports.handler = async (event) => {
   if (event.httpMethod !== "POST") return json(405, { error: "POST only" });
+  connectLambda(event);   // required for classic (Lambda-style) functions to reach Netlify Blobs
   const COACH_SLUG = process.env.COACH_SLUG;
   if (!COACH_SLUG) return json(500, { error: "Site is not configured. Set COACH_SLUG." });
 
