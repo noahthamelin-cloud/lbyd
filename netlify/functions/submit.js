@@ -6,7 +6,7 @@ const json = (status, body) => ({ statusCode: status, headers: { "Content-Type":
 
 exports.handler = async (event) => {
   if (event.httpMethod !== "POST") return json(405, { error: "POST only" });
-  connectLambda(event);   // required for classic (Lambda-style) functions to reach Netlify Blobs
+  try { if (event.blobs) connectLambda(event); } catch (e) {}
   const COACH_SLUG = process.env.COACH_SLUG;
   if (!COACH_SLUG) return json(500, { error: "Site is not configured. Set COACH_SLUG." });
 
@@ -42,8 +42,8 @@ exports.handler = async (event) => {
   };
 
   try {
-    const store = getStore({ name: "leads", consistency: "strong" });
+    const store = getStore("leads");
     await store.setJSON(id, row);
-  } catch (e) { return json(502, { error: "Could not save the lead", detail: String(e.message || e) }); }
+  } catch (e) { return json(502, { error: "Could not save the lead: " + String(e.message || e) }); }
   return json(200, { ok: true, id });
 };
