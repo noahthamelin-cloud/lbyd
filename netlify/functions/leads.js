@@ -5,7 +5,7 @@ const json = (status, body) => ({ statusCode: status, headers: { "Content-Type":
 
 exports.handler = async (event) => {
   if (event.httpMethod !== "POST") return json(405, { error: "POST only" });
-  connectLambda(event);   // required for classic (Lambda-style) functions to reach Netlify Blobs
+  try { if (event.blobs) connectLambda(event); } catch (e) {}
   const { ADMIN_PIN, COACH_SLUG, COACH_NAME } = process.env;
   if (!ADMIN_PIN) return json(500, { error: "Admin is not configured. Set ADMIN_PIN." });
   let p; try { p = JSON.parse(event.body || "{}"); } catch (e) { return json(400, { error: "Bad JSON" }); }
@@ -15,10 +15,10 @@ exports.handler = async (event) => {
     return json(401, { error: "That PIN isn\u2019t right." });
   }
   try {
-    const store = getStore({ name: "leads", consistency: "strong" });
+    const store = getStore("leads");
     const { blobs } = await store.list();
     const keys = blobs.map(b => b.key).sort().reverse().slice(0, 2000);   // newest first (keys start with the timestamp)
     const leads = (await Promise.all(keys.map(k => store.get(k, { type: "json" }).catch(() => null)))).filter(Boolean);
     return json(200, { coach: { slug: COACH_SLUG || "coach", name: COACH_NAME || COACH_SLUG || "Leads" }, leads });
-  } catch (e) { return json(502, { error: "Could not read the leads store", detail: String(e.message || e) }); }
+  } catch (e) { return json(502, { error: "Could not read the leads store: " + String(e.message || e) }); }
 };
